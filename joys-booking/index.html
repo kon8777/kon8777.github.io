@@ -255,10 +255,19 @@
   // ご希望日時カレンダー（予約できる日・枠だけ濃い色で選べる）
   const SLOT_LIST = ["8〜9時到着", "12〜14時到着", "15〜18時到着"];
   const wishes = { 1: { date: "", slot: "" }, 2: { date: "", slot: "" }, 3: { date: "", slot: "" } };
-  const CAL_MONTHS = [[2026, 11], [2026, 12]];
   const pad2 = n => String(n).padStart(2, "0");
   const dstr = (y, m, d) => `${y}-${pad2(m)}-${pad2(d)}`;
   const todayStr = (() => { const t = new Date(); return dstr(t.getFullYear(), t.getMonth() + 1, t.getDate()); })();
+  function calMonths() {
+    const nowKey = Number(todayStr.slice(0, 4)) * 100 + Number(todayStr.slice(5, 7));
+    const set = new Map();
+    for (const k in BLOCKED) {
+      const y = Number(k.slice(0, 4)), m = Number(k.slice(5, 7));
+      if (y * 100 + m >= nowKey) set.set(y * 100 + m, [y, m]);
+    }
+    const arr = [...set.values()].sort((a, b) => (a[0] * 100 + a[1]) - (b[0] * 100 + b[1]));
+    return arr.length ? arr : [[2026, 11], [2026, 12]];
+  }
   function openSlots(ds) { const b = BLOCKED[ds] || []; return SLOT_LIST.filter(s => !b.includes(s)); }
   function dayOpen(ds) { return ds >= todayStr && openSlots(ds).length > 0; }
   function renderPicker(n) {
@@ -274,7 +283,7 @@
     const panel = document.createElement("div");
     panel.className = "wp-panel hidden";
     sum.addEventListener("click", () => panel.classList.toggle("hidden"));
-    for (const [y, m] of CAL_MONTHS) {
+    for (const [y, m] of calMonths()) {
       const mt = document.createElement("div"); mt.className = "wp-month"; mt.textContent = `${y}年${m}月`;
       panel.appendChild(mt);
       const grid = document.createElement("div"); grid.className = "wp-grid";
@@ -563,6 +572,19 @@
 
   renderPicker(1); renderPicker(2); renderPicker(3);
   render();
+
+  // スケジュール表から最新の空き状況を取得する（取れたらカレンダーを描き直す。取れなければ上の内蔵データのまま）
+  window.__joysAvail = function (data) {
+    if (data && data.blocked) {
+      for (const k in data.blocked) BLOCKED[k] = data.blocked[k];
+      renderPicker(1); renderPicker(2); renderPicker(3);
+    }
+  };
+  (function () {
+    const sc = document.createElement("script");
+    sc.src = ENDPOINT + "?callback=__joysAvail";
+    document.head.appendChild(sc);
+  })();
 </script>
 </body>
 </html>
