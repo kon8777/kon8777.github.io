@@ -65,6 +65,22 @@
   .menu-card .mt { font-size: 15px; font-weight: bold; }
   .menu-card .mp { font-size: 13px; color: #6b7a77; }
   .menu-card button { border: none; background: #0d9488; color: #fff; border-radius: 999px; padding: 9px 16px; font-size: 14px; font-weight: bold; cursor: pointer; white-space: nowrap; }
+  .wp-summary { width: 100%; text-align: left; padding: 13px 12px; font-size: 16px; border: 1px solid #cbd5d1; border-radius: 10px; background: #fff; cursor: pointer; color: #26302f; }
+  .wp-summary .ph { color: #9db3ae; }
+  .wp-panel { border: 1px solid #e2e8e6; border-radius: 12px; padding: 12px; margin: 8px 0 14px; background: #fbfdfd; }
+  .wp-month { font-weight: bold; color: #0f766e; margin: 10px 0 6px; font-size: 15px; }
+  .wp-month:first-child { margin-top: 0; }
+  .wp-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+  .wp-dow { font-size: 11px; color: #6b7a77; text-align: center; padding: 2px 0; }
+  .wp-day { padding: 9px 0; text-align: center; border-radius: 8px; font-size: 14px; border: none; background: transparent; font-family: inherit; }
+  .wp-day.open { background: #0d9488; color: #fff; font-weight: bold; cursor: pointer; }
+  .wp-day.shut { background: #eef3f2; color: #bcc9c5; cursor: not-allowed; }
+  .wp-day.sel { outline: 3px solid #f59e0b; outline-offset: 1px; }
+  .wp-slots { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+  .wp-slot { flex: 1; padding: 11px 4px; border-radius: 999px; font-size: 14px; font-weight: bold; cursor: pointer; border: 2px solid #0d9488; background: #0d9488; color: #fff; white-space: nowrap; font-family: inherit; }
+  .wp-slot.shut { background: #eef3f2; color: #bcc9c5; border-color: #e3ebe9; cursor: not-allowed; }
+  .wp-slot.sel { background: #f59e0b; border-color: #f59e0b; }
+  .wp-clear { margin-top: 10px; background: none; border: none; color: #6b7a77; font-size: 13px; text-decoration: underline; cursor: pointer; padding: 0; }
   .typing { display: inline-flex; gap: 4px; padding: 13px 14px; background: #fff; border-radius: 16px; border-top-left-radius: 4px; }
   .typing span { width: 7px; height: 7px; border-radius: 50%; background: #9db8b3; animation: tblink 1s infinite; }
   .typing span:nth-child(2) { animation-delay: .2s; }
@@ -173,13 +189,13 @@
 
     <section>
       <h2>3. ご希望日時</h2>
-      <p style="font-size:13px;color:#6b7a77;margin:0 0 10px;">満席の時間枠は選べなくなっています。それ以外の枠も、ご希望としてうかがう形です。空き状況によっては、別の日時をご相談する場合があります。</p>
+      <p style="font-size:13px;color:#6b7a77;margin:0 0 10px;">ご予約できる日だけ、濃い色で表示されています。日付を押すと、選べる時間枠が出ます。薄い色の日時はご予約できません。日時はご希望としてうかがい、空き状況によっては別の日時をご相談する場合があります。</p>
       <div class="wlabel">第1希望（必須）</div>
-      <div class="wish"><input type="date" id="d1"><select id="s1"><option value="">時間枠を選ぶ</option><option>8〜9時到着</option><option>12〜14時到着</option><option>15〜18時到着</option></select></div>
+      <div class="wishpick" id="wp1"></div>
       <div class="wlabel">第2希望（任意）</div>
-      <div class="wish"><input type="date" id="d2"><select id="s2"><option value="">時間枠を選ぶ</option><option>8〜9時到着</option><option>12〜14時到着</option><option>15〜18時到着</option></select></div>
+      <div class="wishpick" id="wp2"></div>
       <div class="wlabel">第3希望（任意）</div>
-      <div class="wish"><input type="date" id="d3"><select id="s3"><option value="">時間枠を選ぶ</option><option>8〜9時到着</option><option>12〜14時到着</option><option>15〜18時到着</option></select></div>
+      <div class="wishpick" id="wp3"></div>
       <p style="font-size:13px;color:#6b7a77;">送信はお申し込みの受付です。日時は、確認のご連絡をもって確定します。</p>
     </section>
 
@@ -236,13 +252,74 @@
     "2026-12-23": ALL3, "2026-12-24": ALL3, "2026-12-25": ALL3, "2026-12-26": ["15〜18時到着"],
     "2026-12-27": ALL3, "2026-12-28": ALL3, "2026-12-29": ALL3, "2026-12-30": ALL3, "2026-12-31": ALL3
   };
-  function applyBlocked(n) {
-    const d = document.getElementById("d" + n), s = document.getElementById("s" + n);
-    const blocked = BLOCKED[d.value] || [];
-    [...s.options].forEach(o => { o.disabled = blocked.includes(o.value); });
-    if (blocked.includes(s.value)) s.value = "";
+  // ご希望日時カレンダー（予約できる日・枠だけ濃い色で選べる）
+  const SLOT_LIST = ["8〜9時到着", "12〜14時到着", "15〜18時到着"];
+  const wishes = { 1: { date: "", slot: "" }, 2: { date: "", slot: "" }, 3: { date: "", slot: "" } };
+  const CAL_MONTHS = [[2026, 11], [2026, 12]];
+  const pad2 = n => String(n).padStart(2, "0");
+  const dstr = (y, m, d) => `${y}-${pad2(m)}-${pad2(d)}`;
+  const todayStr = (() => { const t = new Date(); return dstr(t.getFullYear(), t.getMonth() + 1, t.getDate()); })();
+  function openSlots(ds) { const b = BLOCKED[ds] || []; return SLOT_LIST.filter(s => !b.includes(s)); }
+  function dayOpen(ds) { return ds >= todayStr && openSlots(ds).length > 0; }
+  function renderPicker(n) {
+    const w = wishes[n];
+    const box = document.getElementById("wp" + n);
+    box.innerHTML = "";
+    const sum = document.createElement("button");
+    sum.type = "button"; sum.className = "wp-summary";
+    if (w.date && w.slot) sum.textContent = fmtDate(w.date, w.slot);
+    else if (w.date) sum.innerHTML = fmtDate(w.date, "") + ' <span class="ph">（時間枠を選んでください）</span>';
+    else sum.innerHTML = '<span class="ph">タップして日時を選ぶ</span>';
+    box.appendChild(sum);
+    const panel = document.createElement("div");
+    panel.className = "wp-panel hidden";
+    sum.addEventListener("click", () => panel.classList.toggle("hidden"));
+    for (const [y, m] of CAL_MONTHS) {
+      const mt = document.createElement("div"); mt.className = "wp-month"; mt.textContent = `${y}年${m}月`;
+      panel.appendChild(mt);
+      const grid = document.createElement("div"); grid.className = "wp-grid";
+      for (const dw of ["日", "月", "火", "水", "木", "金", "土"]) {
+        const c = document.createElement("div"); c.className = "wp-dow"; c.textContent = dw; grid.appendChild(c);
+      }
+      const first = new Date(y, m - 1, 1).getDay();
+      const days = new Date(y, m, 0).getDate();
+      for (let i = 0; i < first; i++) grid.appendChild(document.createElement("div"));
+      for (let d = 1; d <= days; d++) {
+        const ds = dstr(y, m, d);
+        const cell = document.createElement("button");
+        cell.type = "button"; cell.textContent = d;
+        const open = dayOpen(ds);
+        cell.className = "wp-day " + (open ? "open" : "shut") + (w.date === ds ? " sel" : "");
+        if (open) cell.addEventListener("click", () => {
+          w.date = ds;
+          if (w.slot && !openSlots(ds).includes(w.slot)) w.slot = "";
+          renderPicker(n);
+          document.querySelector("#wp" + n + " .wp-panel").classList.remove("hidden");
+        });
+        grid.appendChild(cell);
+      }
+      panel.appendChild(grid);
+    }
+    if (w.date) {
+      const slots = document.createElement("div"); slots.className = "wp-slots";
+      for (const s of SLOT_LIST) {
+        const b = document.createElement("button");
+        b.type = "button"; b.textContent = s;
+        const open = openSlots(w.date).includes(s);
+        b.className = "wp-slot" + (open ? "" : " shut") + (w.slot === s ? " sel" : "");
+        if (open) b.addEventListener("click", () => { w.slot = s; renderPicker(n); });
+        slots.appendChild(b);
+      }
+      panel.appendChild(slots);
+      if (n > 1) {
+        const clr = document.createElement("button");
+        clr.type = "button"; clr.className = "wp-clear"; clr.textContent = "この希望をなしにする";
+        clr.addEventListener("click", () => { w.date = ""; w.slot = ""; renderPicker(n); });
+        panel.appendChild(clr);
+      }
+    }
+    box.appendChild(panel);
   }
-  [1, 2, 3].forEach(n => document.getElementById("d" + n).addEventListener("change", () => applyBlocked(n)));
   const units = () => state.normal + state.souji;
 
   function calc() {
@@ -317,7 +394,7 @@
     if (!val("f-email")) errors.push("メールアドレスを入力してください。");
     else if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(val("f-email"))) errors.push("メールアドレスの形式をご確認ください。");
     if (!val("f-address")) errors.push("ご住所を入力してください。");
-    if (!val("d1") || !val("s1")) errors.push("第1希望の日時と時間枠を選んでください。");
+    if (!wishes[1].date || !wishes[1].slot) errors.push("第1希望の日時と時間枠を選んでください。");
     document.getElementById("error").textContent = errors.join("\n");
     if (errors.length) { window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" }); return; }
 
@@ -343,9 +420,9 @@
       ["ご注文のキッカケ", val("f-kikkake") || "（未入力）"],
       ["紹介コード", val("f-code") || "（未入力）"],
       ["エアコンのメーカー・型番", val("f-model") || "（未入力）"],
-      ["第1希望", fmtDate(val("d1"), val("s1"))],
-      ["第2希望", fmtDate(val("d2"), val("s2"))],
-      ["第3希望", fmtDate(val("d3"), val("s3"))],
+      ["第1希望", fmtDate(wishes[1].date, wishes[1].slot)],
+      ["第2希望", fmtDate(wishes[2].date, wishes[2].slot)],
+      ["第3希望", fmtDate(wishes[3].date, wishes[3].slot)],
     ];
     document.getElementById("confirmList").innerHTML =
       items.map(([k, v]) => `<dt>${k}</dt><dd>${v.replace(/</g, "&lt;")}</dd>`).join("");
@@ -373,7 +450,7 @@
       total: c.total,
       pay: radio("pay"), parking: radio("parking"), pet: radio("pet"), repeat: radio("repeat"),
       kikkake: val("f-kikkake"), code: val("f-code"), model: val("f-model"),
-      wish1: fmtDate(val("d1"), val("s1")), wish2: fmtDate(val("d2"), val("s2")), wish3: fmtDate(val("d3"), val("s3"))
+      wish1: fmtDate(wishes[1].date, wishes[1].slot), wish2: fmtDate(wishes[2].date, wishes[2].slot), wish3: fmtDate(wishes[3].date, wishes[3].slot)
     };
   }
 
@@ -484,6 +561,7 @@
   chatReset.addEventListener("click", startChat);
   startChat();
 
+  renderPicker(1); renderPicker(2); renderPicker(3);
   render();
 </script>
 </body>
