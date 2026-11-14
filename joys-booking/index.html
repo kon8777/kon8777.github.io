@@ -52,6 +52,7 @@
   .guide-ring { position: absolute; left: 41.5%; top: 57%; width: 17%; height: 8.5%; border: 3px solid #dc2626; border-radius: 50%; box-shadow: 0 0 0 2px rgba(255,255,255,.7); }
   .guide-chip { position: absolute; left: 36%; top: 67.5%; background: #dc2626; color: #fff; font-size: 12px; font-weight: bold; padding: 3px 8px; border-radius: 999px; }
   .guide-cap { font-size: 13px; color: #47635e; margin: 6px 0 8px; }
+  .photobtn { display: block; text-align: center; background: #fff; border: 2px dashed #14b8a6; color: #0f766e; font-weight: bold; font-size: 15px; padding: 12px; border-radius: 10px; margin-top: 4px; cursor: pointer; }
 
   .btn { display: block; width: 100%; padding: 16px; font-size: 18px; font-weight: bold; border: none; border-radius: 12px; cursor: pointer; margin-top: 12px; }
   .btn-main { background: #f59e0b; color: #fff; }
@@ -197,9 +198,9 @@
       <input type="text" id="f-code" placeholder="紹介コードをお持ちの方は入力してください">
       <label class="f">エアコンのメーカー・型番（任意）</label>
       <div id="unitRows"></div>
-      <p style="font-size:13px;color:#6b7a77;margin:6px 0 0;">メーカー・型番を教えていただけますと、当日の作業がスムーズに進みます。ご協力をお願いいたします（分かる範囲で大丈夫です）。</p>
       <label class="f">室内機シールの写真（任意）</label>
-      <input type="file" id="f-photo" accept="image/*" multiple>
+      <label class="photobtn" for="f-photo">📷 シールの写真を添付する</label>
+      <input type="file" id="f-photo" accept="image/*" multiple style="display:none">
       <p style="font-size:13px;color:#6b7a77;margin:6px 0 0;">型番が分からない方は、室内機の側面や下側にあるシールの写真を添付いただけると助かります（3枚まで）。富士通製の方は、対応確認のため添付をお願いします。</p>
             <div class="guidebox">
         <p class="guide-t">シールの場所と撮り方</p>
@@ -213,6 +214,7 @@
         <p class="guide-cap">「形名」（型番）のところが読めるように、近づいて撮ってください。</p>
       </div>
       <div id="photoPreviews"></div>
+      <p style="font-size:13px;color:#6b7a77;margin:6px 0 0;">メーカー・型番を教えていただけますと、当日の作業がスムーズに進みます。ご協力をお願いいたします（分かる範囲で大丈夫です）。</p>
     </section>
 
     <section>
@@ -569,7 +571,12 @@
     };
   }
 
-  document.getElementById("submitBtn").addEventListener("click", async () => {
+  let submitting = false;
+  document.getElementById("submitBtn").addEventListener("click", async (ev) => {
+    if (submitting) return;
+    submitting = true;
+    ev.currentTarget.disabled = true;
+    ev.currentTarget.textContent = "送信中…";
     if (ENDPOINT) {
       try {
         const data = collectData();
