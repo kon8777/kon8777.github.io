@@ -201,7 +201,7 @@
       <label class="f">室内機シールの写真</label>
       <label class="photobtn" for="f-photo">📷 シールの写真を添付する</label>
       <input type="file" id="f-photo" accept="image/*" multiple style="display:none">
-      <p style="font-size:13px;color:#6b7a77;margin:6px 0 0;">型番が分からない方は、室内機の側面や下側にあるシールの写真を添付いただけると助かります（3枚まで）。富士通製の方は、対応確認のため添付をお願いします。</p>
+      <p style="font-size:13px;color:#6b7a77;margin:6px 0 0;">型番が分からない方は、室内機の側面や下側にあるシールの写真を添付いただけると助かります（5枚まで）。富士通製の方は、対応確認のため添付をお願いします。</p>
             <div class="guidebox">
         <p class="guide-t">シールの場所と撮り方</p>
         <div class="guide-wrap">
@@ -464,7 +464,7 @@
 
   // 写真：選んだらプレビュー表示、送信時に小さいサイズに変換して送る
   const photoInput = document.getElementById("f-photo");
-  function photoFiles() { return [...photoInput.files].slice(0, 3); }
+  function photoFiles() { return [...photoInput.files].slice(0, 5); }
   photoInput.addEventListener("change", () => {
     const box = document.getElementById("photoPreviews");
     box.innerHTML = "";
