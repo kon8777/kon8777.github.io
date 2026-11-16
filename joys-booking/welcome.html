@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>お申し込みありがとうございます｜クリーンサポートJOYs</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Noto Sans JP", sans-serif; background: #f2f7f6; color: #26302f; }
+  header { background: linear-gradient(135deg, #0d9488, #0f766e); color: #fff; padding: 18px 16px 14px; text-align: center; }
+  header h1 { font-size: 20px; margin: 0 0 4px; }
+  header p { margin: 0; font-size: 13px; opacity: .9; }
+  .demo { display: inline-block; background: #f59e0b; color: #fff; font-size: 12px; font-weight: bold; border-radius: 999px; padding: 2px 10px; margin-top: 8px; }
+  main { max-width: 640px; margin: 0 auto; padding: 16px 12px 40px; }
+  section { background: #fff; border-radius: 14px; padding: 16px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+  .done .big { font-size: 20px; font-weight: bold; color: #0f766e; margin-bottom: 10px; }
+  .done p { font-size: 14px; margin: 6px 0; }
+  dl.summary { margin: 10px 0 0; }
+  dl.summary dt { font-weight: bold; color: #0f766e; margin-top: 10px; font-size: 14px; }
+  dl.summary dd { margin: 2px 0 0; font-size: 15px; }
+  .chat-row { display: flex; gap: 8px; margin: 10px 0; align-items: flex-start; }
+  .chat-row.me { justify-content: flex-end; }
+  .chat-av { flex: 0 0 40px; width: 40px; height: 40px; border-radius: 50%; background: #0d9488; color: #fff; font-size: 11px; font-weight: bold; display: flex; align-items: center; justify-content: center; }
+  .chat-bubble { background: #fff; border-radius: 14px; padding: 10px 12px; font-size: 15px; line-height: 1.6; max-width: 85%; box-shadow: 0 1px 3px rgba(0,0,0,.06); white-space: pre-line; }
+  .chat-row.me .chat-bubble { background: #0d9488; color: #fff; }
+  .typing { background: #fff; border-radius: 14px; padding: 12px 14px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+  .typing span { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #94a3b8; margin-right: 3px; animation: ty 1s infinite; }
+  .typing span:nth-child(2) { animation-delay: .15s; } .typing span:nth-child(3) { animation-delay: .3s; }
+  @keyframes ty { 0%, 100% { opacity: .3; } 50% { opacity: 1; } }
+  .qbtns { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 4px; }
+  .qbtns button { border: 2px solid #0d9488; background: #fff; color: #0f766e; font-weight: bold; font-size: 14px; border-radius: 999px; padding: 9px 14px; cursor: pointer; }
+  .qbtns button:active { background: #ccfbf1; }
+  .askrow { display: flex; gap: 8px; margin-top: 14px; }
+  .askrow input { flex: 1; font-size: 16px; padding: 12px; border: 1px solid #cbd5d1; border-radius: 10px; min-width: 0; }
+  .askrow button { background: #f59e0b; color: #fff; border: none; font-weight: bold; font-size: 15px; border-radius: 10px; padding: 0 18px; cursor: pointer; }
+  .note { font-size: 12px; color: #6b7a77; margin-top: 8px; }
+  .refcard { background: #f0fdfa; border: 1px solid #99e5da; border-radius: 14px; padding: 16px; margin-bottom: 16px; }
+  .refcard h2 { font-size: 16px; margin: 0 0 8px; color: #0f766e; }
+  .refcard p { font-size: 14px; margin: 6px 0; }
+  .refcard a { color: #0f766e; font-weight: bold; }
+  .telbtn { display: block; text-align: center; background: #0d9488; color: #fff; font-weight: bold; font-size: 16px; padding: 13px; border-radius: 10px; text-decoration: none; margin-top: 10px; }
+  footer { text-align: center; font-size: 12px; color: #6b7a77; padding: 0 16px 28px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>クリーンサポートJOYs</h1>
+  <p>エアコンクリーニング</p>
+  <div><span class="demo" id="demoBadge" style="display:none;">試しの画面です</span></div>
+</header>
+<main>
+  <section class="done">
+    <div class="big">お申し込みを受け付けました</div>
+    <p>日時は、確認のご連絡をもって確定します。しばらくお待ちください。</p>
+    <dl class="summary" id="summaryBox"></dl>
+  </section>
+
+  <div id="chatLog"></div>
+  <div class="qbtns" id="qbtns"></div>
+
+  <div class="askrow">
+    <input type="text" id="askInput" placeholder="聞きたいこと">
+    <button id="askBtn">送る</button>
+  </div>
+  <p class="note">お名前・電話番号・ご住所は入れないでください。</p>
+
+  <div class="refcard">
+    <h2>ご家族やお知り合いにもご紹介ください</h2>
+    <p>エアコンのお掃除でお困りの方がいらっしゃいましたら、JOYsの予約ページをお伝えいただけると嬉しいです。</p>
+    <p><a href="https://kon8777.github.io/joys-booking/">予約ページはこちら</a></p>
+  </div>
+
+  <p class="note">このページの案内は自動応答です。正式なご案内は、担当者からの連絡が優先されます。</p>
+</main>
+<footer>クリーンサポートJOYs ☎ 090-4706-8642</footer>
+
+<script>
+  // 申込直後は予約ページが sessionStorage に内容を入れてから、このページへ進む想定。
+  // ?test=1 のときは試しデータを表示する。
+  const TEST = {
+    name: "山田", wish1: "11月23日（月）12〜14時到着", wish2: "", wish3: "",
+    menu: "お掃除機能付き 1台", total: "15,300円", pay: "クレジットカード", parking: "あり", pet: "なし"
+  };
+  let bk = null;
+  try { bk = JSON.parse(sessionStorage.getItem("joysWelcome") || "null"); } catch (e) { bk = null; }
+  const isTest = new URLSearchParams(location.search).get("test") === "1";
+  if (isTest && !bk) { bk = TEST; document.getElementById("demoBadge").style.display = "inline-block"; }
+
+  const sumBox = document.getElementById("summaryBox");
+  if (bk) {
+    const items = [
+      ["お名前", bk.name ? bk.name + " さま" : ""],
+      ["第1希望", bk.wish1 || ""],
+      ["第2希望", bk.wish2 || ""],
+      ["第3希望", bk.wish3 || ""],
+      ["ご注文内容", bk.menu || ""],
+      ["合計金額", bk.total || ""],
+      ["お支払方法", bk.pay || ""],
+      ["駐車場の有無", bk.parking || ""],
+      ["ペットの有無", bk.pet || ""]
+    ].filter(([k, v]) => v);
+    sumBox.innerHTML = items.map(([k, v]) => "<dt>" + k + "</dt><dd>" + String(v).replace(/</g, "&lt;") + "</dd>").join("");
+  }
+
+  const chatLog = document.getElementById("chatLog");
+  const wait = ms => new Promise(r => setTimeout(r, ms));
+  function addBubble(text, who) {
+    const row = document.createElement("div");
+    row.className = "chat-row " + who;
+    if (who === "bot") {
+      const av = document.createElement("div");
+      av.className = "chat-av"; av.textContent = "JOYs";
+      row.appendChild(av);
+    }
+    const b = document.createElement("div");
+    b.className = "chat-bubble"; b.textContent = text;
+    row.appendChild(b);
+    chatLog.appendChild(row);
+    row.scrollIntoView({ behavior: "smooth", block: "end" });
+  }
+  async function botSay(text) {
+    const t = document.createElement("div");
+    t.className = "chat-row bot";
+    const av = document.createElement("div");
+    av.className = "chat-av"; av.textContent = "JOYs";
+    const ty = document.createElement("div");
+    ty.className = "typing"; ty.innerHTML = "<span></span><span></span><span></span>";
+    t.appendChild(av); t.appendChild(ty);
+    chatLog.appendChild(t);
+    await wait(700);
+    t.remove();
+    addBubble(text, "bot");
+  }
+
+  const QA = [
+    { label: "予約の内容", keys: ["内容", "確認", "予約"], answer: () => {
+        if (!bk) return "お申し込みの内容は、この画面の上の「お申し込みを受け付けました」のところに表示されます。お申し込み直後の画面でご確認ください。";
+        let s = "お申し込みの内容はこちらです。";
+        if (bk.wish1) s += "\n第1希望：" + bk.wish1;
+        if (bk.menu) s += "\nご注文内容：" + bk.menu;
+        if (bk.total) s += "\n合計金額：" + bk.total;
+        s += "\n日時は確認のご連絡をもって確定します。内容が違うところがありましたら、お電話でお知らせください。";
+        return s;
+      } },
+    { label: "当日の流れ", keys: ["流れ", "立ち会い", "外出", "留守"], answer: () =>
+      "当日の流れです。\n・到着時に、ごあいさつと作業内容の確認をします\n・作業中は、別室でお休みいただいても、外出していただいても大丈夫です\n・作業が終わったら、作業前後の写真でご説明します\n・最後に、仕上がりの確認をお願いします" },
+    { label: "到着時間", keys: ["到着", "何時", "いつ来"], answer: () =>
+      "到着は、ご希望いただいた枠の時間帯にお伺いします。" + (bk && bk.wish1 ? "\n第1希望は「" + bk.wish1 + "」です。" : "") + "\n確定した日時は、確認のご連絡でお知らせします。" },
+    { label: "当日の準備", keys: ["準備", "片付", "家具"], answer: () =>
+      "エアコンの下と周りに、作業できるスペースを空けていただけると助かります。\n動かせる家具や荷物は、寄せていただけるとスムーズです。動かせないものは、そのままで大丈夫です（まわりを養生して作業します）。" },
+    { label: "作業時間", keys: ["時間", "何分", "どのくらい"], answer: () =>
+      "作業時間は、台数とお掃除機能の有無で変わります。\n当日に、作業を始める前に目安の時間をご説明します。" },
+    { label: "支払い", keys: ["支払", "払い", "領収書"], answer: () =>
+      "お支払い方法は、お申し込みの内容のとおりです。" + (bk && bk.pay ? "\nお申し込みでは「" + bk.pay + "」になっています。" : "") + "\n当日のご案内でも確認いたします。" },
+    { label: "駐車場", keys: ["駐車", "車"], answer: () =>
+      "駐車場がある場合は、スタッフの車を停めさせてください。\n近くのコインパーキングを使う場合は、駐車料金はお客様のご負担でお願いしています。" },
+    { label: "保証", keys: ["保証", "水漏れ", "異音", "壊れ"], answer: () =>
+      "製造から10年以内のエアコンには、作業後1週間の保証が付きます（10年を超える機種は、メーカーのパーツ供給が終わっているため保証対象外です）。\n作業後に異音や水漏れなど気になることがありましたら、お電話でご連絡ください。" },
+    { label: "型番が分からない", keys: ["型番", "機種", "お掃除機能"], answer: () =>
+      "型番が分からなくても大丈夫です。お掃除機能が付いているかどうかは、当日に現地で判断します。" },
+    { label: "キャンセル・日にち変更", keys: ["キャンセル", "変更", "やめ"], answer: () =>
+      "キャンセルや日にちの変更は、お電話（090-4706-8642）か公式LINEでご連絡ください。空き状況を見て調整します。" },
+    { label: "人と話したい", keys: ["人", "電話", "担当"], answer: () =>
+      "担当者へお電話ください。☎ 090-4706-8642\nお申し込みのお名前をお伝えいただくとスムーズです。" }
+  ];
+
+  const qbtns = document.getElementById("qbtns");
+  QA.forEach(q => {
+    const b = document.createElement("button");
+    b.textContent = q.label;
+    b.addEventListener("click", async () => {
+      addBubble(q.label, "me");
+      await botSay(q.answer());
+    });
+    qbtns.appendChild(b);
+  });
+
+  async function askFree(text) {
+    if (!text.trim()) return;
+    addBubble(text, "me");
+    const hit = QA.find(q => q.keys.some(k => text.includes(k)));
+    if (hit) { await botSay(hit.answer()); }
+    else { await botSay("すみません、その質問にはここではお答えできませんでした。お電話（090-4706-8642）でお気軽にどうぞ。"); }
+  }
+  document.getElementById("askBtn").addEventListener("click", () => {
+    const inp = document.getElementById("askInput");
+    askFree(inp.value); inp.value = "";
+  });
+  document.getElementById("askInput").addEventListener("keydown", e => {
+    if (e.key === "Enter") document.getElementById("askBtn").click();
+  });
+
+  (async () => {
+    await botSay("ご予約ありがとうございます。JOYsの案内係です。\n当日までのことで、聞いておきたいことはありますか。下のボタンから選ぶか、入力して送ってください。");
+  })();
+</script>
+</body>
+</html>
