@@ -50,8 +50,8 @@
 </header>
 <main>
   <section class="done">
-    <div class="big">お申し込みを受け付けました</div>
-    <p>まだご予約は確定しておりません。ご予約をいただいた順番に、調整をさせていただいております。担当からの連絡を、少々お待ちください。</p>
+    <div class="big" id="doneTitle">お申し込みを受け付けました</div>
+    <p id="doneText">まだご予約は確定しておりません。ご予約をいただいた順番に、調整をさせていただいております。担当からの連絡を、少々お待ちください。</p>
     <dl class="summary" id="summaryBox"></dl>
   </section>
 
@@ -81,16 +81,35 @@
     name: "山田 花子", wish1: "11月23日（月）12〜14時頃到着の枠", wish2: "11月24日（火）8〜9時頃到着の枠", wish3: "",
     menu: "お掃除機能付き 1台", total: "15,300円", pay: "クレジットカード", parking: "あり", pet: "なし"
   };
+  const params = new URLSearchParams(location.search);
+  const isTel = params.get("tel") === "1";
   let bk = null;
-  try { bk = JSON.parse(sessionStorage.getItem("joysWelcome") || "null"); } catch (e) { bk = null; }
-  const isTest = new URLSearchParams(location.search).get("test") === "1";
-  if (isTest && !bk) { bk = TEST; document.getElementById("demoBadge").style.display = "inline-block"; }
+  if (isTel) {
+    // 電話予約のお客様用：リンクの中に予約内容が入っている
+    bk = {
+      name: params.get("name") || "",
+      wish1: params.get("date") || "",
+      wish2: "", wish3: "",
+      menu: params.get("menu") || "",
+      total: params.get("total") || "",
+      pay: params.get("pay") || "",
+      parking: params.get("parking") || "",
+      pet: params.get("pet") || ""
+    };
+    document.getElementById("doneTitle").textContent = "ご予約ありがとうございます";
+    document.getElementById("doneText").textContent = "お電話でご予約を承りました。ご予約内容は下記のとおりです。";
+    document.title = "ご予約ありがとうございます｜クリーンサポートJOYs";
+  } else {
+    try { bk = JSON.parse(sessionStorage.getItem("joysWelcome") || "null"); } catch (e) { bk = null; }
+    const isTest = params.get("test") === "1";
+    if (isTest && !bk) { bk = TEST; document.getElementById("demoBadge").style.display = "inline-block"; }
+  }
 
   const sumBox = document.getElementById("summaryBox");
   if (bk) {
     const items = [
       ["お名前", bk.name ? bk.name + " さま" : ""],
-      ["第1希望", bk.wish1 || ""],
+      [isTel ? "ご訪問日時" : "第1希望", bk.wish1 || ""],
       ["第2希望", bk.wish2 || ""],
       ["第3希望", bk.wish3 || ""],
       ["ご注文内容", bk.menu || ""],
@@ -135,12 +154,12 @@
   const QA = [
     { label: "予約の内容", keys: ["内容", "確認", "予約", "到着", "何時", "支払", "払い"], answer: () => {
         if (!bk) return "お申し込みの内容は、この画面の上の「お申し込みを受け付けました」のところに表示されます。お申し込み直後の画面でご確認ください。";
-        let s = "お申し込みの内容はこちらです。";
-        if (bk.wish1) s += "\n第1希望：" + bk.wish1;
+        let s = isTel ? "ご予約の内容はこちらです。" : "お申し込みの内容はこちらです。";
+        if (bk.wish1) s += (isTel ? "\nご訪問日時：" : "\n第1希望：") + bk.wish1;
         if (bk.menu) s += "\nご注文内容：" + bk.menu;
         if (bk.total) s += "\n合計金額：" + bk.total;
         if (bk.pay) s += "\nお支払方法：" + bk.pay;
-        s += "\n日時は確認のご連絡をもって確定します。内容が違うところがありましたら、確認のご連絡の際にお知らせください。";
+        s += isTel ? "\n内容が違うところがありましたら、お電話でお知らせください。" : "\n日時は確認のご連絡をもって確定します。内容が違うところがありましたら、確認のご連絡の際にお知らせください。";
         return s;
       } },
     { label: "当日の流れ", keys: ["流れ", "立ち会い", "外出", "留守"], answer: () =>
@@ -176,7 +195,7 @@
     addBubble(text, "me");
     const hit = QA.find(q => q.keys.some(k => text.includes(k)));
     if (hit) { await botSay(hit.answer()); }
-    else { await botSay("すみません、その質問にはここではお答えできませんでした。確認のご連絡のメールにご返信いただけると助かります。"); }
+    else { await botSay(isTel ? "すみません、その質問にはここではお答えできませんでした。お手数ですが、お電話でお問い合わせいただけると助かります。" : "すみません、その質問にはここではお答えできませんでした。確認のご連絡のメールにご返信いただけると助かります。"); }
   }
   document.getElementById("askBtn").addEventListener("click", () => {
     const inp = document.getElementById("askInput");

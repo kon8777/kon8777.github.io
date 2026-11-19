@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>電話予約用 案内リンク作成｜クリーンサポートJOYs</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Noto Sans JP", sans-serif; background: #f2f7f6; color: #26302f; }
+  header { background: linear-gradient(135deg, #0d9488, #0f766e); color: #fff; padding: 18px 16px 14px; text-align: center; }
+  header h1 { font-size: 19px; margin: 0 0 4px; }
+  header p { margin: 0; font-size: 13px; opacity: .9; }
+  main { max-width: 640px; margin: 0 auto; padding: 16px 12px 40px; }
+  section { background: #fff; border-radius: 14px; padding: 16px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+  h2 { font-size: 16px; color: #0f766e; margin: 0 0 12px; }
+  label.flabel { display: block; font-size: 14px; font-weight: bold; margin: 14px 0 6px; }
+  label.flabel:first-of-type { margin-top: 0; }
+  input[type="text"], input[type="date"], select { width: 100%; font-size: 16px; padding: 11px; border: 1px solid #cbd5d1; border-radius: 10px; background: #fff; }
+  .crow { display: flex; align-items: center; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid #eef2f1; }
+  .crow:last-child { border-bottom: none; }
+  .crow .name { font-size: 15px; }
+  .crow .sub { font-size: 12px; color: #6b7a77; }
+  .counter { display: flex; align-items: center; gap: 12px; }
+  .counter button { width: 40px; height: 40px; border-radius: 50%; border: 2px solid #0d9488; background: #fff; color: #0f766e; font-size: 20px; font-weight: bold; cursor: pointer; }
+  .counter button:active { background: #ccfbf1; }
+  .counter .num { font-size: 18px; font-weight: bold; min-width: 24px; text-align: center; }
+  .total { font-size: 20px; font-weight: bold; color: #0f766e; text-align: right; margin-top: 10px; }
+  .make { display: block; width: 100%; background: #0d9488; color: #fff; border: none; font-weight: bold; font-size: 17px; padding: 15px; border-radius: 12px; cursor: pointer; margin-top: 6px; }
+  .make:active { background: #0f766e; }
+  .warn { color: #b91c1c; font-size: 14px; font-weight: bold; margin-top: 10px; display: none; }
+  #result { display: none; }
+  #linkBox { width: 100%; font-size: 13px; padding: 10px; border: 1px solid #cbd5d1; border-radius: 10px; word-break: break-all; }
+  .copy { display: block; width: 100%; background: #f59e0b; color: #fff; border: none; font-weight: bold; font-size: 16px; padding: 13px; border-radius: 12px; cursor: pointer; margin-top: 10px; }
+  .preview { display: block; text-align: center; margin-top: 12px; color: #0f766e; font-weight: bold; font-size: 15px; }
+  .note { font-size: 12px; color: #6b7a77; margin-top: 8px; line-height: 1.6; }
+</style>
+</head>
+<body>
+<header>
+  <h1>電話予約用 案内リンク作成</h1>
+  <p>クリーンサポートJOYs 店主用</p>
+</header>
+<main>
+  <section>
+    <h2>1. お客様と日時</h2>
+    <label class="flabel" for="name">お名前</label>
+    <input type="text" id="name" placeholder="例：山田 花子">
+    <label class="flabel" for="date">訪問日</label>
+    <input type="date" id="date">
+    <label class="flabel" for="slot">到着枠</label>
+    <select id="slot">
+      <option value="8〜9時頃到着の枠">① 8〜9時頃到着</option>
+      <option value="12〜14時頃到着の枠" selected>② 12〜14時頃到着</option>
+      <option value="15〜18時頃到着の枠">③ 15〜18時頃到着</option>
+    </select>
+  </section>
+
+  <section>
+    <h2>2. 台数とオプション（料金は自動計算）</h2>
+    <div class="crow">
+      <div><div class="name">通常タイプ</div><div class="sub">台数</div></div>
+      <div class="counter"><button data-key="normal" data-d="-1">−</button><span class="num" id="n-normal">0</span><button data-key="normal" data-d="1">＋</button></div>
+    </div>
+    <div class="crow">
+      <div><div class="name">お掃除機能付き</div><div class="sub">台数（1台 +6,500円）</div></div>
+      <div class="counter"><button data-key="souji" data-d="-1">−</button><span class="num" id="n-souji">0</span><button data-key="souji" data-d="1">＋</button></div>
+    </div>
+    <div class="crow">
+      <div><div class="name">抗菌コート（ナノソルCC）</div><div class="sub">1,500円／台</div></div>
+      <div class="counter"><button data-key="koukin" data-d="-1">−</button><span class="num" id="n-koukin">0</span><button data-key="koukin" data-d="1">＋</button></div>
+    </div>
+    <div class="crow">
+      <div><div class="name">室外機洗浄</div><div class="sub">3,000円／台</div></div>
+      <div class="counter"><button data-key="shitsugai" data-d="-1">−</button><span class="num" id="n-shitsugai">0</span><button data-key="shitsugai" data-d="1">＋</button></div>
+    </div>
+    <div class="crow">
+      <div><div class="name">ドレンホース洗浄</div><div class="sub">2,500円／台</div></div>
+      <div class="counter"><button data-key="drain" data-d="-1">−</button><span class="num" id="n-drain">0</span><button data-key="drain" data-d="1">＋</button></div>
+    </div>
+    <div class="crow">
+      <div><div class="name">高所作業（2.3m以上）</div><div class="sub">3,000円／台</div></div>
+      <div class="counter"><button data-key="kosho" data-d="-1">−</button><span class="num" id="n-kosho">0</span><button data-key="kosho" data-d="1">＋</button></div>
+    </div>
+    <div class="total">合計（税込） <span id="total">0円</span></div>
+    <p class="note">料金は公式サイト・お電話でのご予約価格（LP価格）で計算します。1回のご予約は5台までです。</p>
+  </section>
+
+  <section>
+    <h2>3. その他</h2>
+    <label class="flabel" for="pay">お支払方法</label>
+    <select id="pay">
+      <option>現金</option>
+      <option>クレジットカード</option>
+      <option>PayPay</option>
+      <option>銀行振込</option>
+    </select>
+    <label class="flabel" for="parking">駐車場の有無</label>
+    <select id="parking">
+      <option>あり</option>
+      <option>なし</option>
+    </select>
+    <label class="flabel" for="pet">ペットの有無</label>
+    <select id="pet">
+      <option>なし</option>
+      <option>あり</option>
+    </select>
+  </section>
+
+  <button class="make" id="makeBtn">案内リンクを作る</button>
+  <p class="warn" id="warn"></p>
+
+  <section id="result">
+    <h2>4. リンクができました</h2>
+    <textarea id="linkBox" rows="4" readonly></textarea>
+    <button class="copy" id="copyBtn">リンクをコピーする</button>
+    <a class="preview" id="previewLink" href="#" target="_blank" rel="noopener">お客様に見える画面を開いて確認する</a>
+    <p class="note">コピーしたリンクを、メールやSMS、LINEに貼ってお客様へ送ってください。</p>
+  </section>
+</main>
+
+<script>
+  const BASE = {0:0, 1:8800, 2:17200, 3:24900, 4:33200, 5:41500};
+  const SOUJI_ADD = 6500;
+  const OPT = { koukin: 1500, shitsugai: 3000, drain: 2500, kosho: 3000 };
+  const OPT_NAME = { koukin: "抗菌コート", shitsugai: "室外機洗浄", drain: "ドレンホース洗浄", kosho: "高所作業" };
+  const state = { normal: 0, souji: 0, koukin: 0, shitsugai: 0, drain: 0, kosho: 0 };
+  const units = () => state.normal + state.souji;
+  const yen = n => n.toLocaleString("ja-JP") + "円";
+
+  function calc() {
+    const u = units();
+    let total = (BASE[u] || 0) + SOUJI_ADD * state.souji;
+    for (const k in OPT) total += OPT[k] * state[k];
+    return total;
+  }
+  function render() {
+    for (const k in state) document.getElementById("n-" + k).textContent = state[k];
+    document.getElementById("total").textContent = yen(calc());
+  }
+  document.querySelectorAll(".counter button").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const key = btn.dataset.key, d = parseInt(btn.dataset.d, 10);
+      let next = state[key] + d;
+      if (next < 0) next = 0;
+      if (key === "normal" || key === "souji") {
+        const other = key === "normal" ? state.souji : state.normal;
+        if (next + other > 5) next = 5 - other;
+      } else {
+        if (next > Math.max(units(), 0)) next = Math.max(units(), 0);
+      }
+      state[key] = next;
+      // 台数が減ったらオプション台数も合わせる
+      const u = units();
+      for (const k in OPT) if (state[k] > u) state[k] = u;
+      render();
+    });
+  });
+  render();
+
+  const WD = ["日", "月", "火", "水", "木", "金", "土"];
+  document.getElementById("makeBtn").addEventListener("click", () => {
+    const warn = document.getElementById("warn");
+    const name = document.getElementById("name").value.trim();
+    const dv = document.getElementById("date").value;
+    const msgs = [];
+    if (!name) msgs.push("お名前を入れてください。");
+    if (!dv) msgs.push("訪問日を選んでください。");
+    if (units() === 0) msgs.push("台数を選んでください。");
+    if (msgs.length) {
+      warn.textContent = msgs.join(" ");
+      warn.style.display = "block";
+      document.getElementById("result").style.display = "none";
+      return;
+    }
+    warn.style.display = "none";
+    const [y, m, d] = dv.split("-").map(Number);
+    const wd = WD[new Date(y, m - 1, d).getDay()];
+    const dateStr = m + "月" + d + "日（" + wd + "）" + document.getElementById("slot").value;
+    const parts = [];
+    if (state.normal) parts.push("通常タイプ " + state.normal + "台");
+    if (state.souji) parts.push("お掃除機能付き " + state.souji + "台");
+    for (const k in OPT) if (state[k]) parts.push(OPT_NAME[k] + " " + state[k] + "台");
+    const q = new URLSearchParams({
+      tel: "1",
+      name: name,
+      date: dateStr,
+      menu: parts.join("、"),
+      total: yen(calc()),
+      pay: document.getElementById("pay").value,
+      parking: document.getElementById("parking").value,
+      pet: document.getElementById("pet").value
+    });
+    const url = "https://kon8777.github.io/joys-booking/welcome.html?" + q.toString();
+    document.getElementById("linkBox").value = url;
+    document.getElementById("previewLink").href = url;
+    document.getElementById("result").style.display = "block";
+    document.getElementById("result").scrollIntoView({ behavior: "smooth" });
+  });
+
+  document.getElementById("copyBtn").addEventListener("click", async () => {
+    const box = document.getElementById("linkBox");
+    try {
+      await navigator.clipboard.writeText(box.value);
+      document.getElementById("copyBtn").textContent = "コピーしました";
+    } catch (e) {
+      box.select();
+      document.execCommand("copy");
+      document.getElementById("copyBtn").textContent = "コピーしました";
+    }
+    setTimeout(() => { document.getElementById("copyBtn").textContent = "リンクをコピーする"; }, 2000);
+  });
+</script>
+</body>
+</html>
