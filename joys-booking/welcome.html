@@ -58,12 +58,6 @@
   <div id="chatLog"></div>
   <div class="qbtns" id="qbtns"></div>
 
-  <div class="askrow">
-    <input type="text" id="askInput" placeholder="聞きたいこと">
-    <button id="askBtn">送る</button>
-  </div>
-  <p class="note">お名前・電話番号・ご住所は入れないでください。</p>
-
   <div class="refcard">
     <h2>ご家族やお知り合いにもご紹介ください</h2>
     <p>エアコンのお掃除でお困りの方がいらっしゃいましたら、JOYsの予約ページをお伝えいただけると嬉しいです。</p>
@@ -192,21 +186,6 @@
       await botSay(q.answer());
     });
     qbtns.appendChild(b);
-  });
-
-  async function askFree(text) {
-    if (!text.trim()) return;
-    addBubble(text, "me");
-    const hit = QA.find(q => q.keys.some(k => text.includes(k)));
-    if (hit) { await botSay(hit.answer()); }
-    else { await botSay(isTel ? "すみません、その質問にはここではお答えできませんでした。お手数ですが、お電話でお問い合わせいただけると助かります。" : "すみません、その質問にはここではお答えできませんでした。確認のご連絡のメールにご返信いただけると助かります。"); }
-  }
-  document.getElementById("askBtn").addEventListener("click", () => {
-    const inp = document.getElementById("askInput");
-    askFree(inp.value); inp.value = "";
-  });
-  document.getElementById("askInput").addEventListener("keydown", e => {
-    if (e.key === "Enter") document.getElementById("askBtn").click();
   });
 
   (async () => {
