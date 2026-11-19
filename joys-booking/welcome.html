@@ -88,6 +88,8 @@
     // 電話予約のお客様用：リンクの中に予約内容が入っている
     bk = {
       name: params.get("name") || "",
+      address: params.get("address") || "",
+      phone: params.get("phone") || "",
       wish1: params.get("date") || "",
       wish2: "", wish3: "",
       menu: params.get("menu") || "",
@@ -110,6 +112,8 @@
     const items = [
       ["お名前", bk.name ? bk.name + " さま" : ""],
       [isTel ? "ご訪問日時" : "第1希望", bk.wish1 || ""],
+      ["ご住所", bk.address || ""],
+      ["お電話番号", bk.phone || ""],
       ["第2希望", bk.wish2 || ""],
       ["第3希望", bk.wish3 || ""],
       ["ご注文内容", bk.menu || ""],

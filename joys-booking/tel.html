@@ -15,7 +15,7 @@
   h2 { font-size: 16px; color: #0f766e; margin: 0 0 12px; }
   label.flabel { display: block; font-size: 14px; font-weight: bold; margin: 14px 0 6px; }
   label.flabel:first-of-type { margin-top: 0; }
-  input[type="text"], input[type="date"], select { width: 100%; font-size: 16px; padding: 11px; border: 1px solid #cbd5d1; border-radius: 10px; background: #fff; }
+  input[type="text"], input[type="tel"], input[type="date"], select { width: 100%; font-size: 16px; padding: 11px; border: 1px solid #cbd5d1; border-radius: 10px; background: #fff; }
   .crow { display: flex; align-items: center; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid #eef2f1; }
   .crow:last-child { border-bottom: none; }
   .crow .name { font-size: 15px; }
@@ -45,6 +45,10 @@
     <h2>1. お客様と日時</h2>
     <label class="flabel" for="name">お名前</label>
     <input type="text" id="name" placeholder="例：山田 花子">
+    <label class="flabel" for="address">ご住所</label>
+    <input type="text" id="address" placeholder="例：八千代市大和田新田402-9 ○○マンション202">
+    <label class="flabel" for="phone">お電話番号</label>
+    <input type="tel" id="phone" placeholder="例：090-1234-5678">
     <label class="flabel" for="date">訪問日</label>
     <input type="date" id="date">
     <label class="flabel" for="slot">到着枠</label>
@@ -183,6 +187,8 @@
     const q = new URLSearchParams({
       tel: "1",
       name: name,
+      address: document.getElementById("address").value.trim(),
+      phone: document.getElementById("phone").value.trim(),
       date: dateStr,
       menu: parts.join("、"),
       total: yen(calc()),
